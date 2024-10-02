@@ -3,10 +3,15 @@ local Librepo = "https://raw.githubusercontent.com/mstudio45/LinoriaLib/main/"
 local Library = loadstring(game:HttpGet(Librepo .. "Library.lua"))()
 local ThemeManager = loadstring(game:HttpGet(Librepo .. "addons/ThemeManager.lua"))()
 local SaveManager = loadstring(game:HttpGet(Librepo .. "addons/SaveManager.lua"))()
-print("--Lib已加载完成--------------------------------加载Local中--")
+print("--Lib已加载------------------------------------加载Local中--")
+if game.PlaceId ~= 12552538292 then
+    Library:Notify("请在游戏内注入",3, 4590657391)
+    Instance.new("Folder",game.Players.LocalPlayer).Name = "PlayerFolder"
+    Instance.new("Folder",game.Players.LocalPlayer.PlayerFolder).Name = "Inventory"
+end
 -- local设置
 local entityNames = {"Angler", "RidgeAngler", "Blitz", "RidgeBlitz", "Pinkie", "RidgePinkie", "Froger", "RidgeFroger","Chainsmoker", "Pandemonium", "Eyefestation", "A60", "Mirage"} -- 实体
-local noautoinst = {"Locker", "MonsterLocker", "LockerUnderwater", "SpawnLocations", "Generator", "BrokenCable","EncounterGenerator"}
+local noautoinst = {"Locker", "MonsterLocker", "LockerUnderwater", "ShopSpawn", "Generator", "BrokenCable","EncounterGenerator"}
 local noezuse = {"EncounterGenerator", "BrokenCables"}
 local playerPositions = {} -- 存储玩家坐标
 local Entitytoavoid = {} -- 自动躲避用-检测实体
@@ -17,7 +22,7 @@ local Character = Players.LocalPlayer.Character -- 本地玩家Character
 local humanoid = Character:FindFirstChild("Humanoid") -- 本地玩家humanoid
 local Espboxes = Players.LocalPlayer.PlayerGui--本地玩家playerGui
 local Inventory = game.Players.LocalPlayer.PlayerFolder.Inventory--本地玩家Inventory
-local RemoteFolder = game:GetService('ReplicatedStorage').Events
+local RemoteFolder = game:GetService('ReplicatedStorage').Events--Remote Event储存区之一
 local Options = getgenv().Linoria.Options--GUI选项
 local Toggles = getgenv().Linoria.Toggles
 local FrameTimer = tick()--设置信息local
@@ -33,7 +38,7 @@ local autoplay367 -- 自动过367小游戏
 local keepfov120 -- 保持广角
 local playeresp -- 玩家esp
 local Notififriend -- 好友提醒
-print("--Local已加载完成---------------------------加载Function中--") -- local结束->Function设置
+print("--Local已加载-------------------------------加载Function中--") -- local结束->Function设置
 local function Notify(content,time,sound) -- 信息
     if time == nil then
         time = 5
@@ -56,7 +61,7 @@ local function copyitems(copyitem,copyitemname) -- 复制物品
         end
     end
 end
-local function createBilltoesp(theobject,name,color,playeresp) -- 创建BillboardGui-颜色:Color3.new(r,g,b)
+local function createBilltoesp(theobject,name,color,espbox,playeresp) -- 创建BillboardGui-颜色:Color3.new(r,g,b)
     local bill = Instance.new("BillboardGui", theobject) -- 创建BillboardGui
     bill.AlwaysOnTop = true
     bill.Size = UDim2.new(0, 100, 0, 50)
@@ -78,35 +83,29 @@ local function createBilltoesp(theobject,name,color,playeresp) -- 创建Billboar
     txt.Position = UDim2.new(0.5, 0, 0.7, 0)
     txt.Text = name
     Instance.new("UIStroke", txt)
-    for _, doespbox in pairs(theobject:GetChildren()) do
-        if doespbox:IsA("BasePart") then
-            local box = Instance.new("BoxHandleAdornment")
-            if playeresp then
-                box.Parent = Players.LocalPlayer.PlayerGui.Espboxes.PlayersEspboxes
-            else
-                box.Parent = Players.LocalPlayer.PlayerGui.Espboxes
-            end
-            box.Name =name .. "espbox"
-            box.Size = doespbox.Size
-            box.AlwaysOnTop = true
-            box.ZIndex = 1
-            box.Color3 =color
-            box.Transparency = 0.7
-            box.Adornee = doespbox
-            task.spawn(function()
-                while box do
-                    if box.Adornee == nil or not box.Adornee:IsDescendantOf(workspace) then
-                        box.Adornee = nil
-                        box.Visible = false
-                        box:Destroy()
-                    end
-                    task.wait()
-                end
-            end)
-        end
+    local box = Instance.new("BoxHandleAdornment")
+    if playeresp then
+        box.Parent = Players.LocalPlayer.PlayerGui.Espboxes.PlayersEspboxes
+    else
+        box.Parent = Players.LocalPlayer.PlayerGui.Espboxes
     end
-
-    createespbox(theobject,name,color, playeresp)
+    box.Name = espbox.name .. "espbox"
+    box.Size = espbox.Size
+    box.AlwaysOnTop = true
+    box.ZIndex = 1
+    box.Color3 =color
+    box.Transparency = 0.7
+    box.Adornee = espbox
+    task.spawn(function()
+        while box do
+            if box.Adornee == nil or not box.Adornee:IsDescendantOf(workspace) then
+                box.Adornee = nil
+                box.Visible = false
+                box:Destroy()
+            end
+            task.wait()
+        end
+    end)
 end
 local function esp(modelname,name,r,g,b,set)
     local setting = "_G." .. set
@@ -170,15 +169,15 @@ local function chatMessage(chat) -- 发送信息
     end
 end
 local function Animation(AnimationID) -- 动作播放
-    local AnimatorGroup = humanoid:WaitForChild("AnimatorGroup")
+    local Animator = humanoid:WaitForChild("Animator")
     local DoAnimation = Instance.new("Animation")
     DoAnimation.AnimationId = AnimationID
-    local AnimationTrack = AnimatorGroup:LoadAnimation(DoAnimation)
+    local AnimationTrack = Animator:LoadAnimation(DoAnimation)
     AnimationTrack:Play()
 end
 local function loadfinish() -- 加载完成后向控制台发送
     print("------------------------其他加载完成------------------------")
-    print("--PressureScript已加载完成")
+    print("--PressureScript已成功加载")
     print("--欢迎使用!" .. game.Players.LocalPlayer.Name)
     print("--此服务器游戏ID为:" .. game.GameId)
     print("--此服务器位置ID为:" .. game.PlaceId)
@@ -189,10 +188,10 @@ end
 local function UnloadUI()--关闭UI等
     Players.LocalPlayer.PlayerGui.Espboxes:Destroy()
     Workspace.MusicBox:Destroy()
-    print('已关闭GUI')
+    warn('已关闭GUI')
     Library:Unload()    
 end
-print("--Function已加载完成------------------------加载其他命令中--") -- Function结束->其他命令
+print("--Function已加载----------------------------加载其他命令中--") -- Function结束->其他命令
 Library:SetWatermarkVisibility(true)--显示信息
 local WatermarkConnection = game:GetService('RunService').RenderStepped:Connect(function()--加载信息
     FrameCounter += 1;
@@ -326,17 +325,19 @@ InteractGroup:AddToggle('AutoInteract',{ -- 自动交互
         autoInteract = Value
         if autoInteract then
             task.spawn(function()
-                while autoInteract or Toggles.AutoInteractKey.Value do -- 交互-循环
-                    for _, toautoInteract in pairs(workspace:GetDescendants()) do
-                        local parentModel = toautoInteract:FindFirstAncestorOfClass("Model")
-                        if toautoInteract:IsA("ProximityPrompt") and parentModel then
-                            if not table.find(noautoinst, parentModel.Name) then
-                                toautoInteract:InputHoldBegin()
+                Options.AutoInteract:OnClick(function()
+                    while autoInteract or Toggles.AutoInteractKey.Value do -- 交互-循环
+                        for _, toautoInteract in pairs(workspace:GetDescendants()) do
+                            local parentModel = toautoInteract:FindFirstAncestorOfClass("Model")
+                            if toautoInteract:IsA("ProximityPrompt") and parentModel then
+                                if not table.find(noautoinst, parentModel.Name) then
+                                    toautoInteract:InputHoldBegin()
+                                end
                             end
                         end
+                        task.wait(0.02)
                     end
-                    task.wait(0.02)
-                end
+                end)
             end)
         end
     end
@@ -346,6 +347,9 @@ InteractGroup:AddToggle('AutoInteract',{ -- 自动交互
     Text = "自动交互",
     SyncToggleState = Library.IsMobile
 })
+
+	print('Keybind clicked!', Options.KeyPicker:GetState())
+
 InteractGroup:AddButton("远程交互电机/电缆(多点几下)",function() -- 交互电机/电缆
     for _, Autointeract in pairs(workspace:GetDescendants()) do
         if Autointeract.Name == "EncounterGenerator" then
@@ -448,7 +452,8 @@ OtherInInteract:AddButton({
     Text = "再来一局",
     DoubleClick = true,
     Func = function()
-        ReplicatedStorage.Events.PlayAgain:FireServer()
+        Notify("请稍等...")
+        RemoteFolder.PlayAgain:FireServer()
     end
 })
 local ItemGroup = Tabs.Item:AddLeftGroupbox("可用物品")
@@ -817,8 +822,7 @@ EspGroup:AddToggle('PlayersEsp',{ -- 玩家
         for _, player in pairs(game.Players:GetPlayers()) do
             if player ~= game.Players.LocalPlayer then
                 if Value then
-                    playeresp = Value
-                    createBilltoesp(player.Character, player.Name, Color3.new(238, 201, 0), Value)
+                    createBilltoesp(player.Character, player.Name, Color3.new(238, 201, 0),nil,true)
                 else
                     if player.Character:FindFirstChildOfClass("BillboardGui") then
                         player.Character:FindFirstChildOfClass("BillboardGui"):Destroy()
@@ -1151,28 +1155,28 @@ SaveManager:SetFolder("script/pressure")
 SaveManager:BuildConfigSection(Tabs["UI Settings"])
 ThemeManager:ApplyToTab(Tabs["UI Settings"])
 workspace.DescendantAdded:Connect(function(inst) -- 其他
-    if inst.Name == "Eyefestation" and Options.noeyefestation.Value then
+    if inst.Name == "Eyefestation" and Toggles.noeyefestation.Value then
         inst:Destroy()
         delNotification("Eyefestation")
     end
-    if inst.Name == "EnragedEyefestation" and Options.noeyefestation.Value then
+    if inst.Name == "EnragedEyefestation" and Toggles.noeyefestation.Value then
         inst:Destroy()
     end
-    if inst.Name == "EyefestationGaze" and Options.noeyefestation.Value then
+    if inst.Name == "EyefestationGaze" and Toggles.noeyefestation.Value then
         inst:Destroy()
     end
-    if inst.Name == "EnragedEyefestation" and Options.noeyefestation.Value then -- 其他
+    if inst.Name == "EnragedEyefestation" and Toggles.noeyefestation.Value then -- 其他
         task.wait(0.2)
         inst:Destroy()
     end
-    if inst.Name == "Searchlights" and Options.nosearchlights.Value then -- 无Searchlights
+    if inst.Name == "Searchlights" and Toggles.nosearchlights.Value then -- 无Searchlights
         for _, SLE in pairs(workspace:GetDescendants()) do
             if SLE.Name == "SearchlightsEncounter" then
                 task.wait(0.1)
                 local SLE_room = workspace.Rooms.SearchlightsEncounter
                 SLE_room.Searchlights:Destroy()
                 SLE_room.MainSearchlight:Destroy()
-            elseif SLE.Name == "SearchlightsEnding" and Options.nosearchlights.Value then
+            elseif SLE.Name == "SearchlightsEnding" and Toggles.nosearchlights.Value then
                 task.wait(0.1)
                 local SLE_room = workspace.Rooms.SearchlightsEnding.Interactables
                 SLE_room.Searchlights1:Destroy()
@@ -1183,106 +1187,110 @@ workspace.DescendantAdded:Connect(function(inst) -- 其他
         end
         delNotification("Searchlights")
     end
-    if inst.Name == "Steams" and Options.nodamage.Value then -- 无环境伤害
+    if inst.Name == "Steams" and Toggles.nodamage.Value then -- 无环境伤害
         task.wait(0.1)
         inst:Destroy()
     end
-    if inst.Name == "DamageParts" and Options.nodamage.Value then
+    if inst.Name == "Steam" and Toggles.nodamage.Value then -- 无环境伤害
         task.wait(0.1)
         inst:Destroy()
     end
-    if inst.Name == "DamagePart" and Options.nodamage.Value then
+    if inst.Name == "DamageParts" and Toggles.nodamage.Value then
         task.wait(0.1)
         inst:Destroy()
     end
-    if inst.Name == "Electricity" and Options.nodamage.Value then
+    if inst.Name == "DamagePart" and Toggles.nodamage.Value then
         task.wait(0.1)
         inst:Destroy()
     end
-    if inst.Name == "TurretSpawn" and Options.noturret.Value then -- 炮台
+    if inst.Name == "Electricity" and Toggles.nodamage.Value then
         task.wait(0.1)
         inst:Destroy()
     end
-    if inst.Name == "TurretSpawn1" and Options.noturret.Value then
+    if inst.Name == "TurretSpawn" and Toggles.noturret.Value then -- 炮台
         task.wait(0.1)
         inst:Destroy()
     end
-    if inst.Name == "TurretSpawn2" and Options.noturret.Value then
+    if inst.Name == "TurretSpawn1" and Toggles.noturret.Value then
         task.wait(0.1)
         inst:Destroy()
     end
-    if inst.Name == "TurretSpawn3" and Options.noturret.Value then
+    if inst.Name == "TurretSpawn2" and Toggles.noturret.Value then
         task.wait(0.1)
         inst:Destroy()
     end
-    if inst.Name == "MonsterLocker" and Options.noMonsterLocker.Value then -- 假柜子
+    if inst.Name == "TurretSpawn3" and Toggles.noturret.Value then
         task.wait(0.1)
         inst:Destroy()
     end
-    if inst.Name == "Joint1" and Options.nosq.Value then -- S-Q
+    if inst.Name == "MonsterLocker" and Toggles.noMonsterLocker.Value then -- 假柜子
+        task.wait(0.1)
+        inst:Destroy()
+    end
+    if inst.Name == "Joint1" and Toggles.nosq.Value then -- S-Q
         task.wait(0.1)
         inst.Parent:Destroy()
     end
-    if inst.Name == "FriendPart" and Options.noFriendPart.Value then -- z432nowatertoswim
+    if inst.Name == "FriendPart" and Toggles.noFriendPart.Value then -- z432nowatertoswim
         task.wait(0.1)
         inst:Destroy()
         delNotification("z432")
     end
     if inst.Name == "WaterPart" and inst:FindFirstAncestorOfClass("Folder").Name == "Rooms" and
-        Options.nowatertoswim.Value then -- 水区
+        Toggles.nowatertoswim.Value then -- 水区
         task.wait(0.1)
         inst:Destroy()
     end
     if inst.Name == "Trickster" and inst:FindFirstAncestorOfClass("Model").Name == "Trickster" and
-        Options.noTrickster.Value then -- 假门
+        Toggles.noTrickster.Value then -- 假门
         Notify("检测假门", "尝试删除")
         inst.Trickster:Destroy()
     end
-    if inst.Name == "WallDweller" and Options.NotifyEntities.Value then -- 实体提醒-z90
+    if inst.Name == "WallDweller" and Toggles.NotifyEntities.Value then -- 实体提醒-z90
         Notify("墙居者出现")
-        if Options.chatNotifyEntities.Value then
+        if Toggles.chatNotifyEntities.Value then
             chatMessage("墙居者出现")
         end
     end
-    if inst.Name == "RottenWallDweller" and Options.NotifyEntities.Value then
+    if inst.Name == "RottenWallDweller" and Toggles.NotifyEntities.Value then
         Notify("墙居者出现")
-        if Options.chatNotifyEntities.Value then
+        if Toggles.chatNotifyEntities.Value then
             chatMessage("墙居者出现")
         end
     end
 end)
 workspace.DescendantRemoving:Connect(function(inst) -- 实体提醒-z90
-    if inst.Name == "WallDweller" and Options.NotifyEntities.Value then
+    if inst.Name == "WallDweller" and Toggles.NotifyEntities.Value then
         Notify("墙居者消失")
-        if Options.chatNotifyEntities.Value then
+        if Toggles.chatNotifyEntities.Value then
             chatMessage("墙居者消失")
         end
     end
-    if inst.Name == "RottenWallDweller" and Options.NotifyEntities.Value then
+    if inst.Name == "RottenWallDweller" and Toggles.NotifyEntities.Value then
         Notify("墙居者消失")
-        if Options.chatNotifyEntities.Value then
+        if Toggles.chatNotifyEntities.Value then
             chatMessage("墙居者消失")
         end
     end
 end)
 workspace.ChildAdded:Connect(function(child) -- 关于实体
     if table.find(entityNames, child.Name) and child:IsDescendantOf(workspace) then
-        if Options.NotifyEntities.Value and Options.avoid.Value ~= false then -- 实体提醒
+        if Toggles.NotifyEntities.Value and Toggles.avoid.Value ~= false then -- 实体提醒
             Notify(child.Name .. "出现")
         end
-        if Options.avoidEntities.Value and child.Name ~= "Mirage" and workspace.r100Intro.Playing ~= true and workspace.r100Intro.r100IntroFadeout.Playing ~= true then -- 自动躲避
+        if Toggles.avoidEntities.Value and child.Name ~= "Mirage" and workspace.r100Intro.Playing ~= true and workspace.r100Intro.r100IntroFadeout.Playing ~= true then -- 自动躲避
             createPlatform("AvoidPlatform", Vector3.new(3000, 1, 3000), Vector3.new(5000, 10000, 5000))
             teleportPlayerTo(Players.LocalPlayer, Platform.Position + Vector3.new(0, Platform.Size.Y / 2 + 5, 0),true)
             Entitytoavoid[child] = true
             Notify(child.Name .. "出现,自动躲避中")
         end
-        if Options.chatNotifyEntities.Value then -- 实体播报
+        if Toggles.chatNotifyEntities.Value then -- 实体播报
             chatMessage(child.Name .. "出现")
         end
-        if Options.EntityEsp.Value then -- 实体esp(待修)
+        if Toggles.EntityEsp.Value then -- 实体esp(待修)
             createespbox(child, child.Name, Color3.new(1, 0, 0))
         end
-        if Options.nopandemonium.Value and child.Name == "Pandemonium" and child:IsDescendantOf(workspace) then -- 删除z367
+        if Toggles.nopandemonium.Value and child.Name == "Pandemonium" and child:IsDescendantOf(workspace) then -- 删除z367
             task.wait(0.1)
             child:Destroy()
             delNotification("Pandemonium")
@@ -1292,52 +1300,52 @@ end)
 workspace.ChildRemoved:Connect(function(child) -- 关于实体
     if table.find(entityNames, child.Name) then
         if workspace.r100Intro.Playing == false and workspace.r100Intro.r100IntroFadeout.Playing == false then
-            if Options.avoidEntities.Value then -- 自动躲避
+            if Toggles.avoidEntities.Value then -- 自动躲避
                 teleportPlayerBack(Players.LocalPlayer)
                 Notify(child.Name .. "消失,已自动返回")
                 if Entitytoavoid[child] then
                     Entitytoavoid[child] = nil
                 end
             end
-            if Options.NotifyEntities.Value and Options.avoidEntities.Value == false then -- 实体提醒
+            if Toggles.NotifyEntities.Value and Toggles.avoidEntities.Value == false then -- 实体提醒
                 Notify(child.Name .. "消失")
             end
-            if Options.chatNotifyEntities.Value then -- 实体播报
+            if Toggles.chatNotifyEntities.Value then -- 实体播报
                 chatMessage(child.Name .. "消失")
             end
         end
     end
     if child.Name == "Mirage" then -- Mirage
-        if Options.NotifyEntities.Value then
+        if Toggles.NotifyEntities.Value then
             Notify("Mirage消失")
         end
-        if Options.chatNotifyEntities.Value then
+        if Toggles.chatNotifyEntities.Value then
             chatMessage(child.Name .. "消失")
         end
     end
 end)
 Players.PlayerAdded:Connect(function(player)
-    if Options.PlayerNotifications.Value then
+    if Toggles.PlayerNotifications.Value then
         if player:IsFriendsWith(Players.LocalPlayer.UserId) then
             Notififriend = "(好友)"
         else
             Notififriend = ""
         end
-        Notify("玩家提醒", player.Name .. Notififriend .. "已加入", 2)
+        Notify(player.Name .. Notififriend .. "已加入", 2)
     end
-    if Options.playeresp.Value and player ~= Players.LocalPlayer then
+    if Toggles.playeresp.Value and player ~= Players.LocalPlayer then
         print(player .. player.Character ..  player.Name)
         createBilltoesp(player.Character, player.Name, Color3.new(238, 201, 0), true)
     end
 end)
 Players.PlayerRemoving:Connect(function(player)
-    if Options.PlayerNotifications.Value then
+    if Toggles.PlayerNotifications.Value then
         if player:IsFriendsWith(Players.LocalPlayer.UserId) then
             Notififriend = "(好友)"
         else
             Notififriend = ""
         end
-        Notify("玩家提醒", player.Name .. Notififriend .. "已退出", 2)
+        Notify(player.Name .. Notififriend .. "已退出", 2)
     end
 end)
 SaveManager:LoadAutoloadConfig()--自动加载配置
