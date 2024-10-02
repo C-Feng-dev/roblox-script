@@ -177,7 +177,7 @@ local function Animation(AnimationID) -- 动作播放
 end
 local function loadfinish() -- 加载完成后向控制台发送
     print("------------------------其他加载完成------------------------")
-    print("--PressureScript已成功加载")
+    print("--PressureScript已加载完成")
     print("--欢迎使用!" .. game.Players.LocalPlayer.Name)
     print("--此服务器游戏ID为:" .. game.GameId)
     print("--此服务器位置ID为:" .. game.PlaceId)
@@ -325,19 +325,17 @@ InteractGroup:AddToggle('AutoInteract',{ -- 自动交互
         autoInteract = Value
         if autoInteract then
             task.spawn(function()
-                Options.AutoInteract:OnClick(function()
-                    while autoInteract or Toggles.AutoInteractKey.Value do -- 交互-循环
-                        for _, toautoInteract in pairs(workspace:GetDescendants()) do
-                            local parentModel = toautoInteract:FindFirstAncestorOfClass("Model")
-                            if toautoInteract:IsA("ProximityPrompt") and parentModel then
-                                if not table.find(noautoinst, parentModel.Name) then
-                                    toautoInteract:InputHoldBegin()
-                                end
+                while autoInteract or Toggles.AutoInteractKey.Value do -- 交互-循环
+                    for _, toautoInteract in pairs(workspace:GetDescendants()) do
+                        local parentModel = toautoInteract:FindFirstAncestorOfClass("Model")
+                        if toautoInteract:IsA("ProximityPrompt") and parentModel then
+                            if not table.find(noautoinst, parentModel.Name) then
+                                toautoInteract:InputHoldBegin()
                             end
                         end
-                        task.wait(0.02)
                     end
-                end)
+                    task.wait(0.02)
+                end
             end)
         end
     end
@@ -347,9 +345,6 @@ InteractGroup:AddToggle('AutoInteract',{ -- 自动交互
     Text = "自动交互",
     SyncToggleState = Library.IsMobile
 })
-
-	print('Keybind clicked!', Options.KeyPicker:GetState())
-
 InteractGroup:AddButton("远程交互电机/电缆(多点几下)",function() -- 交互电机/电缆
     for _, Autointeract in pairs(workspace:GetDescendants()) do
         if Autointeract.Name == "EncounterGenerator" then
@@ -1243,7 +1238,6 @@ workspace.DescendantAdded:Connect(function(inst) -- 其他
     end
     if inst.Name == "Trickster" and inst:FindFirstAncestorOfClass("Model").Name == "Trickster" and
         Toggles.noTrickster.Value then -- 假门
-        Notify("检测假门", "尝试删除")
         inst.Trickster:Destroy()
     end
     if inst.Name == "WallDweller" and Toggles.NotifyEntities.Value then -- 实体提醒-z90
