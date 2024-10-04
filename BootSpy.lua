@@ -54,17 +54,17 @@ function GetFullName(instance)
         table.insert(lo, p)
         p = p.Parent
     end
-    local fullName
+    local firstName local fullName
     if #lo == 0 then
         return "nil PARENTED TO NIL OR DESTROYED ]]"
     end
     if lo[#lo].ClassName ~= "Workspace" then
-        fullName = 'game:GetService("' .. lo[#lo].ClassName .. '")'
+        firstName = 'game:GetService("' .. lo[#lo].ClassName .. '")'
     else
-        fullName = "workspace"
+        firstName = "Workspace"
     end
     for i = #lo - 1, 1, -1 do
-        fullName = fullName .. ':FindFirstChild("' .. lo[i].Name .. '")'
+        fullName = firstName .. ':FindFirstChild("' .. lo[i].Name .. '")'
     end
     return fullName
 end
@@ -211,13 +211,9 @@ end
 function EventMain(Event)
     Logger[Event] = 0
     Event.OnClientEvent:Connect(function(...)
-        --[[if Logger[Event] > Limits[Event.ClassName] then
-    return
-  end]]
         Logger[Event] = Logger[Event] + 1
         local StrArgs = tableloop({...})
-        local FullData = string.format(
-            'BootSpy v%s检测到远程事件\n类型: %s\nlocal args = %s\n\n以下行仅演示服务器执行的操作 ]]\n\n%s:FireClient(game:GetService("Players").%s, unpack(args));',
+        local FullData = string.format('------------------------------\nBootSpy v%s检测到远程事件,类型: %s\n字符串为:local args = %s\n以下行仅演示服务器执行的操作:\n%s:FireClient(game:GetService("Players").%s,args\n------------------------------',
             vers, Event.ClassName, StrArgs, GetFullName(Event), game:GetService("Players").LocalPlayer.Name)
         Output(FullData)
         task.delay(1, function()
