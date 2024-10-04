@@ -1,11 +1,13 @@
-print("--------------------成功注入，正在加载中--------------------")
+print("--------------------成功注入,正在加载Lib--------------------")
 local Librepo = "https://raw.githubusercontent.com/mstudio45/LinoriaLib/main/"
 local Library = loadstring(game:HttpGet(Librepo .. "Library.lua"))()
 local ThemeManager = loadstring(game:HttpGet(Librepo .. "addons/ThemeManager.lua"))()
 local SaveManager = loadstring(game:HttpGet(Librepo .. "addons/SaveManager.lua"))()
-print("--Lib已加载------------------------------------加载Local中--")
-if game.PlaceId ~= 12552538292 then
-    Library:Notify("请在游戏内注入",3, 4590657391)
+print("--Lib已加载-------------------------------------加载其他中--")
+if game.PlaceId == 12552538292 then
+    Library:Notify("请等待加载...",5, 4590657391)
+else
+    Library:Notify("请在正确游戏内注入,在非正确游戏内注入会导致错误",5, 4590657391)
     Instance.new("Folder",game.Players.LocalPlayer).Name = "PlayerFolder"
     Instance.new("Folder",game.Players.LocalPlayer.PlayerFolder).Name = "Inventory"
 end
@@ -15,30 +17,20 @@ local noautoinst = {"Locker", "MonsterLocker", "LockerUnderwater", "ShopSpawn", 
 local noezuse = {"EncounterGenerator", "BrokenCables"}
 local playerPositions = {} -- 存储玩家坐标
 local Entitytoavoid = {} -- 自动躲避用-检测实体
-local Platform -- 平台
 local TeleportService = game:GetService("TeleportService") -- 传送服务
 local Players = game:GetService("Players") -- 玩家服务
 local Character = Players.LocalPlayer.Character -- 本地玩家Character
 local humanoid = Character:FindFirstChild("Humanoid") -- 本地玩家humanoid
 local Espboxes = Players.LocalPlayer.PlayerGui--本地玩家playerGui
 local Inventory = game.Players.LocalPlayer.PlayerFolder.Inventory--本地玩家Inventory
-local RemoteFolder = game:GetService('ReplicatedStorage').Events--Remote Event储存区之一
-local Options = getgenv().Linoria.Options--GUI选项
-local Toggles = getgenv().Linoria.Toggles
+local RemoteFolder = game:GetService('ReplicatedStorage').Events--Remote Event储存区之一]]
+local Options = getgenv().Linoria.Options--选项Value
+local Toggles = getgenv().Linoria.Toggles--按钮状态
 local FrameTimer = tick()--设置信息local
 local FrameCounter = 0;--设置信息local
 local FPS = 60;--设置信息local
--- 以下local为特殊用途
-local AutoInteract -- 自动交互
-local ezInteract -- 轻松交互
-local delMusicBox -- 删除MusicBox
-local maindooresp -- 主门esp
-local instdooresp -- 其他门esp
-local autoplay367 -- 自动过367小游戏
-local keepfov120 -- 保持广角
-local playeresp -- 玩家esp
-local Notififriend -- 好友提醒
-print("--Local已加载-------------------------------加载Function中--") -- local结束->Function设置
+local Ver = "Alpha0.1.0"--版本
+-- local结束->Function设置
 local function Notify(content,time,sound) -- 信息
     if time == nil then
         time = 5
@@ -49,7 +41,7 @@ local function Notify(content,time,sound) -- 信息
     Library:Notify(content, time, sound)
 end
 local function delNotification(content)
-    Notify(content .. " 已成功删除")
+    Notify(content .. " 已成功删除",nil,false)
 end
 local function copyitems(copyitem,copyitemname) -- 复制物品
     for _, thecopyitem in pairs(Inventory:GetChildren()) do
@@ -93,8 +85,8 @@ local function createBilltoesp(theobject,name,color,espbox,playeresp) -- 创建B
     box.Size = espbox.Size
     box.AlwaysOnTop = true
     box.ZIndex = 1
-    box.Color3 =color
-    box.Transparency = 0.7
+    box.Color3 = color
+    box.Transparency = 0.6
     box.Adornee = espbox
     task.spawn(function()
         while box do
@@ -102,32 +94,25 @@ local function createBilltoesp(theobject,name,color,espbox,playeresp) -- 创建B
                 box.Adornee = nil
                 box.Visible = false
                 box:Destroy()
+                break
             end
             task.wait()
         end
     end)
 end
-local function esp(modelname,name,r,g,b,set)
-    local setting = "_G." .. set
+local function esp(modelname, name, r, g, b, espbox)
     for _, theEsp in pairs(workspace:GetDescendants()) do
         if theEsp:IsA("Model") and theEsp.Parent ~= Character and theEsp.Name == modelname then
-            createBilltoesp(theEsp,name, Color3.new(r,g,b))
+            createBilltoesp(theEsp, name, Color3.new(r, g, b), espbox, false)
         end
     end
-    local EspAdded = workspace.DescendantAdded:Connect(function(theEsp)
+    local Addesp = workspace.DescendantAdded:Connect(function(theEsp)
         if theEsp:IsA("Model") and theEsp.Parent ~= Character and theEsp.Name == modelname and setting then
-            createBilltoesp(theEsp,name, Color3.new(r,g,b))
+            createBilltoesp(theEsp, name, Color3.new(r, g, b), espbox, false)
         end
     end)
-    if setting == true then
-        EspAdded:DisConnect()
-        for _, checkEsp in pairs(workspace:GetDescendants()) do
-            if checkEsp:IsA("BillboardGui") and checkEsp.Name == modelname .. "esp" then
-                checkEsp:Destroy()
-            end
-        end
-    end
 end
+
 local function createPlatform(name, sizeVector3,positionVector3) -- 创建平台-Vector3.new(x,y,z)
     if Platform then
         Platform:Destroy() -- 移除多余平台
@@ -189,9 +174,9 @@ local function UnloadUI()--关闭UI等
     Players.LocalPlayer.PlayerGui.Espboxes:Destroy()
     Workspace.MusicBox:Destroy()
     warn('已关闭GUI')
-    Library:Unload()    
+    Library:Unload() 
 end
-print("--Function已加载----------------------------加载其他命令中--") -- Function结束->其他命令
+ -- Function结束->其他命令
 Library:SetWatermarkVisibility(true)--显示信息
 local WatermarkConnection = game:GetService('RunService').RenderStepped:Connect(function()--加载信息
     FrameCounter += 1;
@@ -235,7 +220,6 @@ local Tabs = {--Tabs
     Esp = Window:AddTab("透视"),
     Player = Window:AddTab("玩家"),
     Music = Window:AddTab("音乐盒(客户端)"),
-    Animator = Window:AddTab("动画"),
     Others = Window:AddTab("其他"),
     ['UI Settings'] = Window:AddTab('UI设置'),
 }
@@ -264,25 +248,22 @@ MainGroup:AddButton({ -- 手动返回
     end
 })
 local InteractGroup = Tabs.Tab:AddRightGroupbox("交互")
-InteractGroup:AddToggle('ezInteract',{ -- 轻松交互
+InteractGroup:AddToggle('ezInteract', { -- 轻松交互
     Text = "轻松交互",
     Default = true,
     Callback = function(Value)
-        ezInteract = Value
-        if ezInteract then
-            task.spawn(function()
-                while ezInteract do
-                    for _, toezInteract in pairs(workspace:GetDescendants()) do
-                        if toezInteract:IsA("ProximityPrompt") and ezInteract and not InteractGrouple.find(noezInteract, toezInteract:FindFirstAncestorOfClass("Model").Name) then
-                            toezInteract.HoldDuration = "0"
-                            toezInteract.RequiresLineOfSight = false
-                            toezInteract.MaxActivationDistance = "12"
-                        end
+        task.spawn(function()
+            while Value do
+                for _, toezInteract in pairs(workspace:GetDescendants()) do
+                    if toezInteract:IsA("ProximityPrompt") and not table.find(noezInteract, toezInteract:FindFirstAncestorOfClass("Model").Name) then
+                        toezInteract.HoldDuration = "0"
+                        toezInteract.RequiresLineOfSight = false
+                        toezInteract.MaxActivationDistance = "12"
                     end
-                    task.wait(0.1)
                 end
-            end)
-        end
+                task.wait(0.1)
+            end
+        end)
     end
 })
 InteractGroup:AddToggle('ezfix',{ -- 轻松交互
@@ -299,51 +280,37 @@ InteractGroup:AddToggle('ezfix',{ -- 轻松交互
         end)
     end
 })
-InteractGroup:AddToggle('autoplay367',{ -- 自动过367小游戏
+InteractGroup:AddToggle('autoplay367', { -- 自动过367小游戏
     Text = "自动过367小游戏",
     Default = true,
     Tooltip = '固定367小游戏圆圈',
     Callback = function(Value)
-        autoplay367 = Value
-        if autoplay367 then
-            task.spawn(function()
-                while autoplay367 do
-                    local PandemoniumGame = game.Players.LocalPlayer.PlayerGui.Main.PandemoniumMiniGame.Background.Frame
-                    PandemoniumGame.circle.Position = UDim2.new(0, 0, 0, 20)
-                    task.wait()
-                end
-            end)
-        else
-            autoplay367 = false
-        end
+        task.spawn(function()
+            while Value do
+                local PandemoniumGame = game.Players.LocalPlayer.PlayerGui.Main.PandemoniumMiniGame.Background.Frame
+                PandemoniumGame.circle.Position = UDim2.new(0, 0, 0, 20)
+                task.wait()
+            end
+        end)
     end
-})
-InteractGroup:AddToggle('AutoInteract',{ -- 自动交互
+})InteractGroup:AddToggle('AutoInteract', { -- 自动交互
     Text = "自动交互",
     Default = false,
     Callback = function(Value)
-        autoInteract = Value
-        if autoInteract then
-            task.spawn(function()
-                while autoInteract or Toggles.AutoInteractKey.Value do -- 交互-循环
-                    for _, toautoInteract in pairs(workspace:GetDescendants()) do
-                        local parentModel = toautoInteract:FindFirstAncestorOfClass("Model")
-                        if toautoInteract:IsA("ProximityPrompt") and parentModel then
-                            if not table.find(noautoinst, parentModel.Name) then
-                                toautoInteract:InputHoldBegin()
-                            end
+        task.spawn(function()
+            while Value do -- 交互-循环
+                for _, toautoInteract in pairs(workspace:GetDescendants()) do
+                    local parentModel = toautoInteract:FindFirstAncestorOfClass("Model")
+                    if toautoInteract:IsA("ProximityPrompt") and parentModel then
+                        if not table.find(noautoinst, parentModel.Name) then
+                            toautoInteract:InputHoldBegin()
                         end
                     end
-                    task.wait(0.02)
                 end
-            end)
-        end
+                task.wait(0.02)
+            end
+        end)
     end
-}):AddKeyPicker("AutoInteractKey", {
-    Mode = Library.IsMobile and "Toggle" or "Hold",
-    Default = "R",
-    Text = "自动交互",
-    SyncToggleState = Library.IsMobile
 })
 InteractGroup:AddButton("远程交互电机/电缆(多点几下)",function() -- 交互电机/电缆
     for _, Autointeract in pairs(workspace:GetDescendants()) do
@@ -361,19 +328,16 @@ InteractGroup:AddButton("远程交互电机/电缆(多点几下)",function() -- 
     end
 end)
 local OtherInInteract = Tabs.Tab:AddLeftGroupbox("其他") do
-OtherInInteract:AddToggle('keepfov120',{ -- 保持广角
+OtherInInteract:AddToggle('keepfov120', { -- 保持广角
     Text = "保持广角",
     Default = true,
     Callback = function(Value)
-        keepfov120 = Value
-        if keepfov120 then
-            task.spawn(function()
-                while keepfov120 do
-                    game.Workspace.Camera.FieldOfView = "120"
-                    task.wait()
-                end
-            end)
-        end
+        task.spawn(function()
+            while keepfov120 do
+                game.Workspace.Camera.FieldOfView = "120"
+                task.wait()
+            end
+        end)
     end
 })
 OtherInInteract:AddToggle('FullBrightLite',{ -- 高亮
@@ -381,10 +345,9 @@ OtherInInteract:AddToggle('FullBrightLite',{ -- 高亮
     Default = false,
     Callback = function(Value)
         local Light = game:GetService("Lighting")
-        if Value then
-            FullBrightLite = true
+        if Value and Library.Unloaded ~= true then
             task.spawn(function()
-                while FullBrightLite do
+                while Value do
                     Light.Ambient = Color3.new(1, 1, 1)
                     Light.ColorShift_Bottom = Color3.new(1, 1, 1)
                     Light.ColorShift_Top = Color3.new(1, 1, 1)
@@ -392,7 +355,6 @@ OtherInInteract:AddToggle('FullBrightLite',{ -- 高亮
                 end
             end)
         else
-            FullBrightLite = false
             Light.Ambient = Color3.new(0, 0, 0)
             Light.ColorShift_Bottom = Color3.new(0, 0, 0)
             Light.ColorShift_Top = Color3.new(0, 0, 0)
@@ -943,60 +905,73 @@ PlayerOtherGroup:AddToggle('PlatformStand',{ -- 人物直立
         end
     end
 })
-local MusicBoxGroup = Tabs.Music:AddLeftGroupbox('音乐盒')
-local MusicBoxGroupSet = Tabs.Music:AddRightGroupbox('音乐盒设置')
-MusicBoxGroup:AddToggle('MusicBoxSwitch',{
-    Text = "音乐盒开关",
-    Default = true,
-    Callback = function(Value)
-        if Value then
-            workspace.MusicBox.Playing = true
-        else
-            workspace.MusicBox:Pause()
+local InjectGroupBox = Tabs.Others:AddLeftGroupbox('注入')--其他
+local JoinGroupBox = Tabs.Others:AddRightGroupbox('加入')
+local AboutGroupBox = Tabs.Others:AddLeftGroupbox('关于')
+local MusicBoxGroup = Tabs.Others:AddLeftGroupbox('音乐盒')
+local AnimatorGroup = Tabs.Others:AddRightGroupbox('动画')-- 动画
+local MiscGroupBox = Tabs.Others:AddRightGroupbox('杂项')
+InjectGroupBox:AddButton({
+    Text = "注入Infinity Yield",
+    Func = function()
+        Notify("尝试注入Infinity Yield")
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
+        Notify("注入完成(如果没有加载请重试)")
+    end
+})
+InjectGroupBox:AddButton({
+    Text = "注入Dex v2 white(会卡顿)",
+    Func = function()
+        Notify("尝试注入Dex v2 white")
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/MariyaFurmanova/Library/main/dex2.0'))()
+        Notify("注入完成(如果没有加载请重试)")
+    end
+})
+InjectGroupBox:AddButton({
+    Text = "注入Dex v4 Beta(会卡顿)",
+    Func = function()
+        Notify("尝试注入Dex v4 Beta")
+        local RepositoryName = "Dex"
+        local File = "out.lua"
+        local link = "https://raw.githubusercontent.com/luau/" .. RepositoryName .. "/master/" .. File
+        loadstring(game:HttpGet(link, true), "Dex")(link)
+        Notify("注入完成(如果没有加载请重试)")
+    end
+})
+InjectGroupBox:AddButton({
+    Text = "注入UNC Test(英文)",
+    Func = function()
+        Notify("尝试注入UNC Test")
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/unified-naming-convention/NamingStandard/main/UNCCheckEnv.lua'))()
+        Notify("注入完成(如果没有加载请重试)")
+    end
+})
+JoinGroupBox:AddButton({
+    Text = "加入随机大厅",
+    Func = function()
+        Notify("尝试加入中")
+        TeleportService:Teleport(12411473842)
+    end
+})
+JoinGroupBox:AddButton({
+    Text = "加入随机游戏",
+    Func = function()
+        Notify("尝试加入中")
+        TeleportService:Teleport(12552538292)
+    end
+})
+JoinGroupBox:AddInput('JobIdToJoin',{
+    Text = "使用JobId加入游戏",
+    Callback = function(jobId)
+        local function failtp()
+            Notify("加入失败,若JobId正确则可能对应的服务器为预留服务器")
+            warn("加入失败!")
         end
+        Notify("尝试加入中")
+        TeleportService:TeleportToPlaceInstance(12552538292, jobId, Players.LocalPlayer)
+        TeleportService.TeleportInitFailed:Connect(failtp)
     end
 })
-MusicBoxGroup:AddInput('MusicBoxID',{
-    Text = "音乐ID",
-    Numeric = true,
-	Finished = true,
-	ClearTextOnFocus = false,
-    Callback = function(musicid)
-        workspace.MusicBox.SoundId = "rbxassetid://" .. musicid
-        workspace.MusicBox:Play()
-        workspace.MusicBox.Looped = true
-    end
-})
-MusicBoxGroupSet:AddInput('MusicBoxSound',{
-    Text = "音乐音量",
-    Numeric = true,
-	Finished = true,
-	ClearTextOnFocus = false,
-    Callback = function(musicvolume)
-        workspace.MusicBox.Volume = musicvolume
-    end
-})
-MusicBoxGroupSet:AddInput('MusicBoxTimePosition',{
-    Text = "音乐进度",
-    Numeric = true,
-	Finished = true,
-	ClearTextOnFocus = false,
-    Callback = function(musicTimePosition)
-        workspace.MusicBox.TimePosition = musicTimePosition
-    end
-})
-MusicBoxGroupSet:AddToggle('MusicBoxLoop',{
-    Text = "音乐循环",
-    Default = true,
-    Callback = function(Value)
-        if Value then
-            workspace.MusicBox.Looped = true
-        else
-            workspace.MusicBox.Looped = false
-        end
-    end
-})
-local AnimatorGroup = Tabs.Animator:AddLeftGroupbox('动画')-- 动画
 AnimatorGroup:AddInput('AnimatorGroupID',{
     Text = "动画ID",
     TextDisappear = true,
@@ -1060,84 +1035,75 @@ AnimatorGroup:AddButton({
         Animation("rbxassetid://18836343961")
     end
 })
-local InjectGroupBox = Tabs.Others:AddLeftGroupbox('注入')--其他
-local JoinGroupBox = Tabs.Others:AddRightGroupbox('加入')
-local AboutGroupBox = Tabs.Others:AddLeftGroupbox('关于')
-local MiscGroupBox = Tabs.Others:AddRightGroupbox('杂项')
-InjectGroupBox:AddButton({
-    Text = "注入Infinity Yield",
-    Func = function()
-        Notify("尝试注入Infinity Yield")
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
-        Notify("注入完成(如果没有加载请重试)")
-    end
-})
-InjectGroupBox:AddButton({
-    Text = "注入Dex v2 white(会卡顿)",
-    Func = function()
-        Notify("尝试注入Dex v2 white")
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/MariyaFurmanova/Library/main/dex2.0'))()
-        Notify("注入完成(如果没有加载请重试)")
-    end
-})
-InjectGroupBox:AddButton({
-    Text = "注入Dex v4 Beta(会卡顿)",
-    Func = function()
-        Notify("尝试注入Dex v4 Beta")
-        local RepositoryName = "Dex"
-        local File = "out.lua"
-        local link = "https://raw.githubusercontent.com/luau/" .. RepositoryName .. "/master/" .. File
-        loadstring(game:HttpGet(link, true), "Dex")(link)
-        Notify("注入完成(如果没有加载请重试)")
-    end
-})
-InjectGroupBox:AddButton({
-    Text = "注入UNC Test(英文)",
-    Func = function()
-        Notify("尝试注入UNC Test")
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/unified-naming-convention/NamingStandard/main/UNCCheckEnv.lua'))()
-        Notify("注入完成(如果没有加载请重试)")
-    end
-})
-JoinGroupBox:AddButton({
-    Text = "加入随机大厅",
-    Func = function()
-        Notify("尝试加入中")
-        TeleportService:Teleport(12411473842)
-    end
-})
-JoinGroupBox:AddButton({
-    Text = "加入随机游戏",
-    Func = function()
-        Notify("尝试加入中")
-        TeleportService:Teleport(12552538292)
-    end
-})
-JoinGroupBox:AddInput('JobIdToJoin',{
-    Text = "使用JobId加入游戏",
-    Callback = function(jobId)
-        local function failtp()
-            Notify("加入失败,若JobId正确则可能对应的服务器为预留服务器")
-            warn("加入失败!")
-        end
-        Notify("尝试加入中")
-        TeleportService:TeleportToPlaceInstance(12552538292, jobId, Players.LocalPlayer)
-        TeleportService.TeleportInitFailed:Connect(failtp)
-    end
-})
 MiscGroupBox:AddButton({
     Text = "删除Dex",
     Func = function()   
-        game.CoreGui.Dex:Destroy()
+        if game.CoreGui.Dex then
+            game.CoreGui.Dex:Destroy()
+        elseif Players.LocalPlayer.PlayerGui.Dex then
+            Players.LocalPlayer.PlayerGui.Dex:Destroy()
+        end
         Notify("Dex", "已关闭")
+    end
+})
+MusicBoxGroup:AddToggle('MusicBoxSwitch',{
+    Text = "音乐盒开关",
+    Default = true,
+    Callback = function(Value)
+        if Value then
+            workspace.MusicBox.Playing = true
+        else
+            workspace.MusicBox:Pause()
+        end
+    end
+})
+MusicBoxGroup:AddInput('MusicBoxID',{
+    Text = "音乐ID",
+    Numeric = true,
+	Finished = true,
+	ClearTextOnFocus = false,
+    Callback = function(musicid)
+        workspace.MusicBox.SoundId = "rbxassetid://" .. musicid
+        workspace.MusicBox:Play()
+        workspace.MusicBox.Looped = true
+    end
+})
+MusicBoxGroup:AddInput('MusicBoxSound',{
+    Text = "音乐音量",
+    Numeric = true,
+	Finished = true,
+	ClearTextOnFocus = false,
+    Callback = function(musicvolume)
+        workspace.MusicBox.Volume = musicvolume
+    end
+})
+MusicBoxGroup:AddInput('MusicBoxTimePosition',{
+    Text = "音乐进度",
+    Numeric = true,
+	Finished = true,
+	ClearTextOnFocus = false,
+    Callback = function(musicTimePosition)
+        workspace.MusicBox.TimePosition = musicTimePosition
+    end
+})
+MusicBoxGroup:AddToggle('MusicBoxLoop',{
+    Text = "音乐循环",
+    Default = true,
+    Callback = function(Value)
+        if Value then
+            workspace.MusicBox.Looped = true
+        else
+            workspace.MusicBox.Looped = false
+        end
     end
 })
 AboutGroupBox:AddLabel("此服务器上的游戏ID为:" .. game.GameId)
 AboutGroupBox:AddLabel("此服务器上的游戏版本为:version_" .. game.PlaceVersion)
 AboutGroupBox:AddLabel("此服务器位置ID为:" .. game.PlaceId)
+AboutGroupBox:AddLabel("版本:" .. Ver)
 local MenuGroup = Tabs["UI Settings"]:AddLeftGroupbox("菜单")
 MenuGroup:AddToggle("KeybindMenuOpen", { Default = false, Text = "打开键位显示", Callback = function(value) Library.KeybindFrame.Visible = value end})
-MenuGroup:AddToggle("ShowCustomCursor", {Text = "LinoriaLib鼠标", Default = true, Callback = function(Value) Library.ShowCustomCursor = Value end})
+MenuGroup:AddButton("关闭LinoriaLib鼠标",function() Library.ShowCustomCursor = false end)
 MenuGroup:AddDivider()
 MenuGroup:AddLabel("菜单键位"):AddKeyPicker("MenuKeybind", { Default = "RightShift", NoUI = true, Text = "Menu keybind" })
 MenuGroup:AddButton("关闭", function() WatermarkConnection:Disconnect() print('已关闭GUI') Library:Unload() end)
@@ -1269,10 +1235,11 @@ workspace.DescendantRemoving:Connect(function(inst) -- 实体提醒-z90
 end)
 workspace.ChildAdded:Connect(function(child) -- 关于实体
     if table.find(entityNames, child.Name) and child:IsDescendantOf(workspace) then
-        if Toggles.NotifyEntities.Value and Toggles.avoid.Value ~= false then -- 实体提醒
+        if Toggles.NotifyEntities.Value and Toggles.avoidEntities.Value == false then -- 实体提醒
             Notify(child.Name .. "出现")
         end
-        if Toggles.avoidEntities.Value and child.Name ~= "Mirage" and workspace.r100Intro.Playing ~= true and workspace.r100Intro.r100IntroFadeout.Playing ~= true then -- 自动躲避
+        if Toggles.avoidEntities.Value and child.Name ~= "Mirage" and workspace.r100Intro.Playing == false and
+            workspace.r100Intro.r100IntroFadeout.Playing == false then -- 自动躲避
             createPlatform("AvoidPlatform", Vector3.new(3000, 1, 3000), Vector3.new(5000, 10000, 5000))
             teleportPlayerTo(Players.LocalPlayer, Platform.Position + Vector3.new(0, Platform.Size.Y / 2 + 5, 0),true)
             Entitytoavoid[child] = true
@@ -1280,9 +1247,6 @@ workspace.ChildAdded:Connect(function(child) -- 关于实体
         end
         if Toggles.chatNotifyEntities.Value then -- 实体播报
             chatMessage(child.Name .. "出现")
-        end
-        if Toggles.EntityEsp.Value then -- 实体esp(待修)
-            createespbox(child, child.Name, Color3.new(1, 0, 0))
         end
         if Toggles.nopandemonium.Value and child.Name == "Pandemonium" and child:IsDescendantOf(workspace) then -- 删除z367
             task.wait(0.1)
@@ -1292,28 +1256,18 @@ workspace.ChildAdded:Connect(function(child) -- 关于实体
     end
 end)
 workspace.ChildRemoved:Connect(function(child) -- 关于实体
-    if table.find(entityNames, child.Name) then
-        if workspace.r100Intro.Playing == false and workspace.r100Intro.r100IntroFadeout.Playing == false then
-            if Toggles.avoidEntities.Value then -- 自动躲避
-                teleportPlayerBack(Players.LocalPlayer)
-                Notify(child.Name .. "消失,已自动返回")
-                if Entitytoavoid[child] then
-                    Entitytoavoid[child] = nil
-                end
-            end
-            if Toggles.NotifyEntities.Value and Toggles.avoidEntities.Value == false then -- 实体提醒
-                Notify(child.Name .. "消失")
-            end
-            if Toggles.chatNotifyEntities.Value then -- 实体播报
-                chatMessage(child.Name .. "消失")
+    if table.find(entityNames, child.Name) and workspace.r100Intro.Playing == false and workspace.r100Intro.r100IntroFadeout.Playing == false then
+        if Toggles.avoidEntities.Value then -- 自动躲避
+            teleportPlayerBack(Players.LocalPlayer)
+            Notify(child.Name .. "消失,已自动返回")
+            if Entitytoavoid[child] then
+                Entitytoavoid[child] = nil
             end
         end
-    end
-    if child.Name == "Mirage" then -- Mirage
-        if Toggles.NotifyEntities.Value then
-            Notify("Mirage消失")
+        if Toggles.NotifyEntities.Value and Toggles.avoidEntities.Value == false then -- 实体提醒
+            Notify(child.Name .. "消失")
         end
-        if Toggles.chatNotifyEntities.Value then
+        if Toggles.chatNotifyEntities.Value then -- 实体播报
             chatMessage(child.Name .. "消失")
         end
     end
