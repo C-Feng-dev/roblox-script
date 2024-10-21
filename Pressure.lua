@@ -204,7 +204,7 @@ for _, Espboxes in pairs(Players.LocalPlayer.PlayerGui:GetChildren()) do -- 删�
         Espboxes:Destroy()
     end
 end
-for _, MusicBox in pairs(Players.LocalPlayer.PlayerGui:GetChildren()) do -- 删除多余MusicBox
+for _, MusicBox in pairs(workspace:GetChildren()) do -- 删除多余MusicBox
     if MusicBox.Name == "MusicBox" and MusicBox:IsA("Sound") then
         MusicBox:Destroy()
     end
@@ -383,6 +383,20 @@ Tab:AddToggle({ -- 高亮
         end
     end
 })
+Tab:AddSlider({
+    Name = "玩家透明度",
+    Min = 0,
+    Max = 1,
+    Default = 0,
+    Increment = 0.05,
+    Callback = function(Value)
+        for _, humanpart in pairs(Character:GetChildren()) do
+            if humanpart:IsA("MeshPart") then
+                humanpart.Transparency = Value
+            end
+        end
+    end
+})
 Tab:AddToggle({ -- 玩家提醒
     Name = "玩家提醒",
     Default = true,
@@ -441,29 +455,22 @@ Tab:AddButton({
         workspace.PlaylistSong:Destroy()
     end
 })
-Tab:AddTextbox({
-    Name = "聊天",
-    Callback = function(chat)
-        chatMessage(chat)
+Tab:AddTextbox({ -- 腿部高度
+    Name = "玩家腿部高度",
+    TextDisappear = false,
+    Callback = function(Value)
+        humanoid.HipHeight = Value
     end
 })
-local Section = Tab:AddSection({
-    Name = "获取卡"
-})
-Tab:AddButton({
-    Name = "获取钥匙卡",
-    Hold = false,
-    Callback = function() -- 获取钥匙卡
-        copyitems("NormalKeyCard")
-        Notification("钥匙卡", "已成功获取")
-    end
-})
-Tab:AddButton({
-    Name = "获取特殊钥匙卡",
-    Hold = false,
-    Callback = function() -- 获取特殊钥匙卡
-        copyitems("InnerKeyCard")
-        Notification("特殊钥匙卡", "已成功获取")
+Tab:AddSlider({
+    Name = "玩家重力",
+    Min = 1,
+    Max = 500,
+    Default = 200,
+    Increment = 1,
+    ValueName = "Gravity",
+    Callback = function(Value)
+        game.Workspace.Gravity = Value
     end
 })
 local Item = Window:MakeTab({
@@ -967,124 +974,6 @@ Esp:AddToggle({ -- 玩家
                     end
                 end
             end
-        end
-    end
-})
-local Player = Window:MakeTab({ -- 玩家
-    Name = "玩家",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
-local Section = Player:AddSection({
-    Name = "相机"
-})
-Player:AddSlider({ -- 视场角
-    Name = "视场角",
-    Min = 1,
-    Max = 120,
-    Default = 120,
-    Increment = 1,
-    ValueName = "fov",
-    Callback = function(Value)
-        game.Workspace.Camera.FieldOfView = Value
-    end
-})
-local Section = Player:AddSection({
-    Name = "身体"
-})
-Player:AddSlider({ -- 速度
-    Name = "速度",
-    Min = 1,
-    Max = 200,
-    Default = 17,
-    Increment = 1,
-    ValueName = "speed",
-    Callback = function(Value)
-        humanoid.WalkSpeed = Value
-    end
-})
-Player:AddSlider({ -- 跳跃强度
-    Name = "跳跃强度",
-    Min = 1,
-    Max = 200,
-    Default = 50,
-    Increment = 1,
-    ValueName = "power",
-    Callback = function(Value)
-        humanoid.JumpPower = Value
-    end
-})
-Player:AddSlider({
-    Name = "透明度",
-    Min = 0,
-    Max = 1,
-    Default = 0,
-    Increment = 0.05,
-    Callback = function(Value)
-        for _, humanpart in pairs(Character:GetChildren()) do
-            if humanpart:IsA("MeshPart") then
-                humanpart.Transparency = Value
-            end
-        end
-    end
-})
-Player:AddTextbox({ -- 腿部高度
-    Name = "腿部高度",
-    TextDisappear = false,
-    Callback = function(Value)
-        humanoid.HipHeight = Value
-    end
-})
-Player:AddSlider({ -- 斜坡角度
-    Name = "最大斜坡角度",
-    Min = 0,
-    Max = 89,
-    Default = 89,
-    Increment = 1,
-    ValueName = "度",
-    Callback = function(Value)
-        humanoid.MaxSlopeAngle = Value
-    end
-})
-Player:AddSlider({
-    Name = "重力",
-    Min = 1,
-    Max = 500,
-    Default = 200,
-    Increment = 1,
-    ValueName = "Gravity",
-    Callback = function(Value)
-        game.Workspace.Gravity = Value
-    end
-})
-local Section = Player:AddSection({
-    Name = "其他"
-})
-Player:AddToggle({ -- 自动转向
-    Name = "自动转向",
-    Default = true,
-    Callback = function(Value)
-        if Value then
-            humanoid.AutoRotate = true
-        else
-            humanoid.AutoRotate = false
-        end
-    end
-})
-Player:AddButton({
-    Name = "坐",
-    Callback = function()
-        humanoid.Sit = true
-    end
-})
-Player:AddToggle({ -- 人物直立
-    Name = "人物直立",
-    Default = false,
-    Callback = function(Value)
-        if Value then
-            humanoid.PlatformStand = true
-        else
-            humanoid.PlatformStand = false
         end
     end
 })
