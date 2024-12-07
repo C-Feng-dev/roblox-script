@@ -4876,12 +4876,14 @@ function f.rightClick()
         Shortcut = "Del",
         Disabled = #selection.List == 0,
         OnClick = function()
-            print("DELETE")
+            print("DELETEING")
             pcall(function()
                 for i, v in pairs(selection.List) do
                     v:Destroy()
+                    print(v)
                 end
             end)
+            print("DELETED")
             rightClickContext:Hide()
         end
     })
@@ -6531,6 +6533,7 @@ function f.newProperties()
 end
 
 local function welcomePlayer()
+    print("Welcome -- DarkDex V5 old")
     welcomeFrame.Visible = true
     welcomeMain.Position = UDim2.new(-0.6, 0, 0, 0)
     welcomeChangelog.Position = UDim2.new(1, 5, 0, 20)
@@ -6580,6 +6583,8 @@ local function welcomePlayer()
 
     welcomeFrame:TweenPosition(UDim2.new(0.5, -250, 0, -350), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.5,
         true)
+    wait(1)
+    welcomeFrame:Destroy()
 end
 
 mouse.Move:connect(function()
@@ -6606,7 +6611,3 @@ propertiesTree.Expanded["CAT:Surface Inputs"] = false
 propertiesTree.Expanded["CAT:Surface"] = false
 
 welcomePlayer()
-
-for i, v in pairs(nodes[workspace]) do
-    print(type(i))
-end

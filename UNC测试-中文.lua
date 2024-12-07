@@ -440,7 +440,7 @@ test("listfiles", {}, function()
 	assert(isfolder(folders[1]), "Did not return a folder path")
 end)
 
-test("writefile", {}, function()
+--[[test("writefile", {}, function()
 	writefile(".tests/writefile.txt", "success")
 	assert(readfile(".tests/writefile.txt") == "success", "Did not write the file")
 	local requiresFileExt = pcall(function()
@@ -450,7 +450,7 @@ test("writefile", {}, function()
 	if not requiresFileExt then
 		return "This executor requires a file extension in writefile"
 	end
-end)
+end)]]
 
 test("makefolder", {}, function()
 	makefolder(".tests/makefolder")

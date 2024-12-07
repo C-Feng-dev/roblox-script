@@ -57,7 +57,7 @@ local mapping: gameMapping = HttpService:JSONDecode(game:HttpGet(baseURL .. "/ma
 local scriptPath = mapping.main
 
 if mapping.exclusions and mapping.exclusions[tostring(game.PlaceId)] then
-    scriptPath = mapping.exclusions[tostring(game.PlaceId)]
+    scriptPath = mapping.w[tostring(game.PlaceId)]
 end
 
 loadstring(game:HttpGet(baseURL .. scriptPath))()
